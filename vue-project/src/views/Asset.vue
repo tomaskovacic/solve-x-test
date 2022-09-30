@@ -14,7 +14,7 @@
         },
         methods: {
             sendEmail (){
-                window.open(`mailto:tehnician@solve-x.com?subject=Demaged item&body=Please fix the damaged item.`);
+                window.open("mailto:tehnician@solve-x.com?subject=Demaged item&body=Please fix the damaged item.");
             }
         }
     }

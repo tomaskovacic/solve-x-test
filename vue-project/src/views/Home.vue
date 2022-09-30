@@ -14,7 +14,7 @@
     },
     computed: {
       ...mapGetters({
-        assets: 'assets/data',
+        assets: 'assets/data'
       }),
       filteredAssets() {
         return this.assets.filter(asset => asset.title.includes(this.search))

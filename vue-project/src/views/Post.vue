@@ -2,6 +2,8 @@
   import Footer from '../components/Footer.vue'
   import PlusSVG from '../components/icons/Plus.vue'
   import MinusSVG from '../components/icons/Minus.vue'
+  import { mapActions, mapGetters } from 'vuex'
+
 
   export default {
     components: {
@@ -13,17 +15,24 @@
       createNewInput() {
         this.count++;
       },
-      removeInput () {
+      removeInput() {
         this.count--;
       },
       addAsset() {
         var tempAssetText = Object.values(this.newAssetText)
         var tempAssetValue = Object.values(this.newAssetValue)
-        tempAssetText.push("title")
-        tempAssetValue.push(this.titleValue)
+        tempAssetText.unshift("title")
+        tempAssetValue.unshift(this.titleValue)
+        tempAssetText.unshift("id")
+        tempAssetValue.unshift(this.id)
         tempAssetText.forEach((key, i) => this.newAsset[key] = tempAssetValue[i]);
         console.log(this.newAsset)
-      }
+        this.addAssetToStore(this.newAsset)
+        this.$router.push("/");
+      },
+      ...mapActions({
+        addAssetToStore: 'assets/insertAsset'
+      })
     }, data() {
       return {
         count: 0,
@@ -33,6 +42,11 @@
         newAsset: {},
         titleValue: '',
       }
+    },
+    computed: {
+      ...mapGetters({
+        id: 'assets/id',
+      })
     }
   }
 </script>
@@ -58,20 +72,21 @@
             </div>
           </template>
           <div class="button-wrapper">
-          <button class="button-add" @click="createNewInput">
-           Add new input <PlusSVG />
-          </button>
-          <button class="button-remove" @click="removeInput">
-            Remove input <MinusSVG />
-           </button>
-        </div>
-        <div class="add-asset-wrapper">
-          <button value="addAsset" type="submit">Add asset</button>
-        </div>
+            <button class="button-add" @click="createNewInput">
+              Add new input
+              <PlusSVG />
+            </button>
+            <button class="button-remove" @click="removeInput">
+              Remove input
+              <MinusSVG />
+            </button>
+          </div>
+          <div class="add-asset-wrapper">
+            <button value="addAsset" type="submit">Add asset</button>
+          </div>
         </form>
       </div>
     </div>
-    {{ newAsset }}
   </div>
   <Footer />
 </template>
@@ -82,10 +97,12 @@
     display: flex;
     justify-content: center;
   }
+
   .button-wrapper {
     display: flex;
     justify-content: space-between;
   }
+
   .value {
     width: 200px;
   }
@@ -95,7 +112,8 @@
     text-align: center;
   }
 
-  .button-add, .button-remove {
+  .button-add,
+  .button-remove {
     margin-top: 30px;
     width: 150px;
     display: flex;
