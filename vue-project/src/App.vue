@@ -13,6 +13,7 @@
       ...mapGetters({
         authenticated: 'auth/authenticated',
         user: 'auth/user',
+        role: 'assets/role'
       }),
     },
     methods: {
@@ -61,6 +62,7 @@
         <template v-if="authenticated">
           <div class="nav-wrapper nav-wrapper-mobile">
             <p>Pozdravljen {{ user.name }}</p>
+            <RouterLink v-if="role == 'technician'" to="/technician">Dashboard</RouterLink>
             <RouterLink to="/post">Add asset</RouterLink>
             <a href="/" @click.prevent="signOut">Logout</a>
           </div>

@@ -1,22 +1,74 @@
 <script>
     import Footer from '../components/Footer.vue'
-    import { mapGetters } from 'vuex'
+    import { mapGetters, mapActions } from 'vuex'
 
     export default {
         props: ["id"],
+        data() {
+            return {
+                connected: [],
+                selectedAsset: {},
+            }
+        },
         components: {
             Footer,
         },
         computed: {
             ...mapGetters({
                 assets: 'assets/data',
+                role: 'assets/role',
             }),
+            objectKey (){
+
+            }
         },
         methods: {
-            sendEmail (){
+            sendEmail() {
                 window.open("mailto:tehnician@solve-x.com?subject=Demaged item&body=Please fix the damaged item.");
+            },
+            generateCSV() {
+                var tempassets = Object.entries(this.selectedAsset);
+                var csv = 'Text, Value\n';
+
+                tempassets.forEach(row => {
+                    csv += row.join(',');
+                    csv += "\n";
+                });
+
+                var hiddenElement = document.createElement('a');
+                hiddenElement.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);
+                hiddenElement.target = '_blank';
+                hiddenElement.download = 'data.csv';
+                hiddenElement.click();
+            },
+            checkConnection() {
+                const temp = this.assets.filter(element => element.id != this.id)
+                for (const property in this.selectedAsset) {
+                    temp.forEach(asset => {
+                        for (const assetPropertys in asset) {
+                            if (assetPropertys === property) {
+                                if (asset[assetPropertys] === this.selectedAsset[property]) {
+                                    const tempConnected = {}
+                                    tempConnected[assetPropertys] = asset[assetPropertys]
+                                    tempConnected.id = asset['id']
+                                    this.connected.push(tempConnected)
+                                }
+                            }
+                        }
+                    });
+
+                }
+            },
+            displayConnectedItem (asset){
+                let temp = Object.keys(asset)[0]
+                return `${temp}: ${asset[temp]}` 
             }
-        }
+        },
+        created() {
+            this.$store.dispatch('assets/setSelected', parseInt(this.id))
+            this.selectedAsset = this.$store.getters['assets/selected']
+            this.checkConnection();
+        },
     }
 </script>
 
@@ -40,15 +92,49 @@
                 </div>
             </div>
         </div>
-        <div class="damaged">
-            <h3>Is asset demaged?</h3>
-            <button class="dameged-button" @click="sendEmail">Inform technician</button>
+        <div class="content-wrapper gap">
+            <div class="left-side">
+                <h3>Is asset demaged?</h3>
+                <button class="dameged-button" @click="sendEmail">Inform technician</button>
+                <div class="export" v-if="role == 'admin'">
+                    <h3>Export to excel</h3>
+                    <button @click="generateCSV">Export</button>
+                </div>
+            </div>
+            <div class="right-side">
+                <h3>Asset is connected to:</h3>
+                <div class="dynamic" v-for="(conn, name) in connected" :key="conn.id">
+                    <RouterLink class="router-link" :to="{ name: 'asset', params: { id: conn.id }}">
+                    <p>{{ displayConnectedItem(conn) }}</p>
+                </RouterLink>
+                </div>
+            </div>
         </div>
     </div>
     <Footer />
 </template>
 
 <style scoped>
+    button {
+        margin-top: 15px;
+    }
+    .router-link {
+        text-decoration: none;
+        color: #f794a4;
+    }
+
+    .router-link:hover {
+        color: #c87986;
+    }
+
+    h3 {
+        margin-top: 20px;
+    }
+
+    .gap {
+        margin: 50px 0 100px 0;
+    }
+
     .img {
         max-width: 600px;
         max-height: 600px;

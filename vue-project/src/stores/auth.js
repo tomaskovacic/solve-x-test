@@ -40,7 +40,6 @@ export default {
 
             try {
                 let response = await axios.get('/api/users/me');
-                console.log(response.data)
                 commit('SET_USER', response.data)
             }catch(e){
                 commit('SET_TOKEN', null)

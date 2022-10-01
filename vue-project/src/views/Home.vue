@@ -19,6 +19,7 @@
       filteredAssets() {
         return this.assets.filter(asset => asset.title.includes(this.search))
       }
+      // this.assets.filter(asset => asset.id.includes(this.search))
     }
   }
 </script>
@@ -44,7 +45,6 @@
       </div>
     </div>
     <div class="pegination">
-      1 2 3 4 5
     </div>
   </main>
   <Footer />
