@@ -26,7 +26,6 @@
         tempAssetText.unshift("id")
         tempAssetValue.unshift(this.id)
         tempAssetText.forEach((key, i) => this.newAsset[key] = tempAssetValue[i]);
-        console.log(this.newAsset)
         this.addAssetToStore(this.newAsset)
         this.$router.push("/");
       },
