@@ -7,6 +7,8 @@ export default {
         //      technician      admin
         id: 13,
         selectedAsset: {},
+        damagedAsset: [],
+        demagedId: 0,
     },
     getters: {
         data(state) {
@@ -20,6 +22,9 @@ export default {
         },
         selected(state){
             return state.selectedAsset
+        },
+        damaged(state){
+            return state.damagedAsset
         }
     },
     mutations: {
@@ -29,6 +34,12 @@ export default {
         SET_SELECTED(state, temp){
             state.selectedAsset = temp
         },
+        UPDATE_ASSET(state, array){
+            state.damagedAsset.push(array)
+        },
+        UPDATE_DAMAGED_ID(state, id){
+            state.demagedId = id
+        }
     },
     actions: {
         async insertAsset({ commit, state }, obj) {
@@ -38,6 +49,10 @@ export default {
         async setSelected ({commit, state}, id){
             const temp = state.assets.find(asset => asset.id === id)
             await commit('SET_SELECTED', temp)
+        },
+        async damagedAsset ({commit},array ){
+            await commit('UPDATE_ASSET', array)
+            // await commit('UPDATE_DAMAGED_ID', id)
         }
     }
 };

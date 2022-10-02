@@ -32,9 +32,10 @@ const router = createRouter({
       props: true
     },
     {
-      path: "/technician",
+      path: "/technician/:id",
       name: "technician",
       component: () => import("../views/Technician.vue"),
+      props: true
     },
   ],
 });

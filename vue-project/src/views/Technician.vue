@@ -2,12 +2,14 @@
     import Footer from '../components/Footer.vue'
 
     export default {
+        props: ["id"],
         components: {
             Footer,
         },
         data() {
             return {
                 photos: [],
+                toUpload: [],
                 isCameraOpen: false,
                 isPhotoTaken: false,
                 isShotPhoto: false,
@@ -19,6 +21,8 @@
                 },
                 resized: false,
                 activeId: '',
+                drawing: true,
+                error: '',
             }
         },
         methods: {
@@ -28,9 +32,11 @@
                     this.isPhotoTaken = false;
                     this.isShotPhoto = false;
                     this.stopCameraStream();
+                    this.drawing = false;
                 } else {
                     this.isCameraOpen = true;
                     this.createCameraElement();
+                    this.drawing = true;
                 }
             },
             createCameraElement() {
@@ -68,53 +74,57 @@
                 this.isPhotoTaken = !this.isPhotoTaken;
                 const context = this.$refs.canvas.getContext('2d');
                 context.drawImage(this.$refs.camera, 0, 0, 640, 480);
+                this.draw();
             },
             savePhoto() {
                 const canvastemp = document.getElementById("photoTaken").toDataURL("image/jpeg")
                     .replace("image/jpeg", "image/octet-stream");
                 this.storePhoto(canvastemp);
+                this.isPhotoTaken = !this.isPhotoTaken
             },
             storePhoto(photo) {
                 this.photos.push(photo)
-                console.log(this.photos);
             },
             drawArrayCanvas() {
                 return this.photos
             },
             draw() {
-                var canvas = document.getElementById("photoTaken");
-                var ctx = canvas.getContext("2d");
+                if (this.drawing) {
+                    var canvas = document.getElementById("photoTaken");
+                    var ctx = canvas.getContext("2d");
 
-                document.addEventListener('resize', this.resize);
-                document.addEventListener('mousemove', this.drawOnCanvas);
-                document.addEventListener('mousedown', this.setPosition);
-                document.addEventListener('mouseenter', this.setPosition);
+                    document.addEventListener('resize', this.resize);
+                    document.addEventListener('mousemove', this.drawOnCanvas);
+                    document.addEventListener('mousedown', this.setPosition);
+                    document.addEventListener('mouseenter', this.setPosition);
+                }
             },
             setPosition(e) {
-                var canvas = document.getElementById("photoTaken");
-                var ctx = canvas.getContext("2d");
-                this.pos.x = e.clientX - 852;
-                this.pos.y = e.clientY - 154;
+                if (this.drawing) {
+                    var canvas = document.getElementById("photoTaken");
+                    var ctx = canvas.getContext("2d");
+                    this.pos.x = e.clientX - 852;
+                    this.pos.y = e.clientY - 154;
+                }
             },
             drawOnCanvas(e) {
-                var canvas = document.getElementById("photoTaken");
-                var ctx = canvas.getContext("2d");
+                if (this.drawing) {
+                    var canvas = document.getElementById("photoTaken");
+                    var ctx = canvas.getContext("2d");
 
-                if (e.buttons !== 1) return;
+                    if (e.buttons !== 1) return;
 
-                ctx.beginPath();
+                    ctx.beginPath();
 
-                ctx.lineWidth = 5;
-                ctx.lineCap = 'round';
-                ctx.strokeStyle = '#c0392b';
+                    ctx.lineWidth = 5;
+                    ctx.lineCap = 'round';
+                    ctx.strokeStyle = '#c0392b';
 
-                ctx.moveTo(this.pos.x, this.pos.y);
-                this.setPosition(e);
-                ctx.lineTo(this.pos.x, this.pos.y);
-                ctx.stroke();
-            },
-            uploadImage() {
-                console.log('test');
+                    ctx.moveTo(this.pos.x, this.pos.y);
+                    this.setPosition(e);
+                    ctx.lineTo(this.pos.x, this.pos.y);
+                    ctx.stroke();
+                }
             },
             arrayCanvasEmpty() {
                 if (this.photos.length != 0) {
@@ -123,13 +133,43 @@
                 return false
             },
             updateSelected(item) {
+                let found = undefined
                 this.activeId = item
+                if (this.toUpload.length === 0) {
+                    this.toUpload.push(item)
+                } else {
+                    this.toUpload.forEach(upload => {
+                        found = this.toUpload.find(upload => upload === item);
+                    });
+                    if (found === undefined) {
+                        this.toUpload.push(item)
+                    } else {
+                        let index = this.toUpload.indexOf(item);
+                        this.toUpload.splice(index, 1);
+                    }
+                }
             },
             getActiveClass(item) {
-                if (item === this.activeId) {
-                    return "active-tile";
-                } else {
-                    return "";
+                let classes = ['']
+                this.toUpload.forEach(upload => {
+                    if (item === upload) {
+                        classes.push("active-tile")
+                    }
+                });
+                return classes
+            },
+            uploadImage() {
+                if (this.toUpload.length !== 0) {
+                    this.$store.dispatch('assets/damagedAsset', this.toUpload)
+                    this.$router.push({ name: 'asset', params: { id: this.id } })
+                    this.isCameraOpen = false;
+                    this.isPhotoTaken = false;
+                    this.isShotPhoto = false;
+                    this.stopCameraStream();
+                    this.drawing = false;
+                }
+                else {
+                    this.error = 'Pls select image!'
                 }
             },
         },
@@ -165,11 +205,6 @@
                             Take a photo!
                         </button>
                     </div>
-                    <div v-if="isPhotoTaken && isCameraOpen" class="button-wrapper">
-                        <button type="button" class="button" @click="draw">
-                            Draw on photo
-                        </button>
-                    </div>
                     <div v-if="isPhotoTaken && isCameraOpen" class="save-photo">
                         <button class="button" role="button" @click="savePhoto">
                             Save photo
@@ -189,6 +224,7 @@
                         Upload images
                     </button>
                 </div>
+                {{ error }}
             </div>
         </div>
     </div>
@@ -197,13 +233,14 @@
 </template>
 
 <style scoped>
-    .active-tile {
-        border: 1px solid blue;
-    }
-
     .canvas-tile {
         width: 117px;
         height: 100px;
+        border: 5px solid white;
+    }
+
+    .active-tile {
+        border: 5px solid #f794a4;
     }
 
     .store {
