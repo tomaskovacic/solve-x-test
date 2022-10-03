@@ -61,8 +61,7 @@
         </div>
         <template v-if="authenticated">
           <div class="nav-wrapper nav-wrapper-mobile">
-            <p>Pozdravljen {{ user.name }}</p>
-            <RouterLink v-if="role == 'technician'" to="/technician">Dashboard</RouterLink>
+            <p>Hello {{ user.name }}</p>
             <RouterLink to="/post">Add asset</RouterLink>
             <a href="/" @click.prevent="signOut">Logout</a>
           </div>

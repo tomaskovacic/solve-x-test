@@ -68,14 +68,17 @@
                 if (this.damaged.length !== 0) {
                     return true
                 }
+            },
+            getAllData() {
+                this.$store.dispatch('assets/setSelected', parseInt(this.id))
+                this.selectedAsset = this.$store.getters['assets/selected']
+                this.damaged = this.$store.getters['assets/damaged']
+                this.checkConnection();
             }
+
         },
         created() {
-            this.$store.dispatch('assets/setSelected', parseInt(this.id))
-            this.selectedAsset = this.$store.getters['assets/selected']
-            this.damaged = this.$store.getters['assets/damaged']
-            console.log(this.damaged);
-            this.checkConnection();
+            this.getAllData()
         },
     }
 </script>
@@ -85,17 +88,17 @@
         <div class="breadcrumbs">
             <RouterLink to="/" class="breadcrumbs-previous">Home</RouterLink>
             <p class="seperator">></p>
-            <p class="breadcrumbs-active"> {{ selectedAsset.title }}</p>
+            <p class="breadcrumbs-active"> {{ assets[id-1].title }}</p>
         </div>
         <div class="title-wrapper">
-            <h2 class="title">{{ selectedAsset.title }}</h2>
+            <h2 class="title">{{ assets[id-1].title }}</h2>
         </div>
         <div class="content-wrapper">
             <div class="left-side">
                 <img class="img" src="../assets/chair.jpg">
             </div>
             <div class="right-side">
-                <div class="dynamic" v-for="(asset, name) in selectedAsset" :key="asset">
+                <div class="dynamic" v-for="(asset, name) in assets[id-1]" :key="asset">
                     <p>{{ name }}: {{ asset }}</p>
                 </div>
             </div>

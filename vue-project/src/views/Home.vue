@@ -6,7 +6,7 @@
   export default {
     data() {
       return {
-        search: ''
+        searchQuery: ''
       }
     },
     components: {
@@ -17,9 +17,12 @@
         assets: 'assets/data'
       }),
       filteredAssets() {
-        return this.assets.filter(asset => asset.title.includes(this.search))
+        const results = this.assets.filter(element => {
+          let temp = element.title.toLowerCase().includes(this.searchQuery) || element.location.toLowerCase().includes(this.searchQuery) || element.id.toString().toLowerCase().includes(this.searchQuery)
+          return temp;
+        });
+        return results
       }
-      // this.assets.filter(asset => asset.id.includes(this.search))
     }
   }
 </script>
@@ -32,11 +35,11 @@
           Browse assets
         </div>
         <div class="sub-title">
-          <input class="search" type="search" v-model="search" placeholder="Search assets">
+          <input class="search" type="search" v-model="searchQuery" placeholder="Search assets">
         </div>
       </div>
       <div class="tile-wrapper">
-        <div class="tile" v-for="asset in filteredAssets" :key="uniqueasset">
+        <div class="tile" v-for="asset in filteredAssets" :key="asset">
           <RouterLink class="router-link" :to="{ name: 'asset', params: { id: asset.id }}">
             <img class="img" src="../assets/chair.jpg">
             <div class="title">{{ asset.title}}</div>
